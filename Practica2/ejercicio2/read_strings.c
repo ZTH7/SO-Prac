@@ -52,5 +52,7 @@ int main(int argc, char *argv[])
 		printf("%s\n", token);
 	}
 
+	fclose(file);
+
 	return 0;
 }
