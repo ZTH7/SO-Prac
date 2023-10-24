@@ -4,10 +4,12 @@ function usage {
 	echo Parameter incorrect
 }
 
+# Comprobar que se haya pasado un único argumento
 if [ $# != 1 ]; then
 	usage && exit -1
 fi
 
+# Comprobar si es un directorio
 if [ -d $1 ]; then
 	rm -r $1/
 fi

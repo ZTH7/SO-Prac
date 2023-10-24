@@ -7,7 +7,7 @@
 #define BLOCK_SIZE 512
 
 void testFile(char* path, int mode) {
-	int file = open(path, mode | O_CREAT | O_TRUNC, 0666);
+	int file = open(path, mode | O_CREAT, 0666);
 	if (file == -1) {
         perror("Error opening file");
         exit(EXIT_FAILURE);
