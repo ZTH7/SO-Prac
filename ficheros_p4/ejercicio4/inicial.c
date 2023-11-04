@@ -15,7 +15,8 @@ int main(void)
     fd1 = open("output.txt", O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
     write(fd1, "00000", 5);
     for (i=1; i < 10; i++) {
-        pos = lseek(fd1, 0, SEEK_CUR);
+        fd1 = open("output.txt", O_RDWR, S_IRUSR | S_IWUSR);
+        pos = lseek(fd1, i*16, SEEK_CUR);
         if (fork() == 0) {
             /* Child */
             sprintf(buffer, "%d", i*11111);
