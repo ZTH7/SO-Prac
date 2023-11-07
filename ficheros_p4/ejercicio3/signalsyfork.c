@@ -5,12 +5,12 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-pid_t child_pid;
+pid_t pid;
 
 void handle_alarm(int signo) {
     // Este manejador enviará una señal SIGKILL al proceso hijo
     // cuando reciba una señal de alarma (SIGALRM).
-    kill(getpid(), SIGKILL);
+    kill(pid, SIGKILL);
 }
 
 int main(int argc, char **argv) {
@@ -19,7 +19,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    pid_t pid;
     int status;
 
     // Crear el proceso hijo
@@ -38,7 +37,7 @@ int main(int argc, char **argv) {
     } else {
         // Código del proceso padre
 		// Ignorar la señal SIGINT
-        signal(SIGINT, SIG_IGN);
+        //signal(SIGINT, SIG_IGN);
 
         // Establecer el manejador de la señal SIGALRM
         struct sigaction sa;
@@ -48,8 +47,12 @@ int main(int argc, char **argv) {
         // Programar una alarma para que envíe una señal después de 5 segundos
         alarm(5);
 
+        pause(); // Espera a que acaben las señales
+
         // Esperar a que el hijo termine
-        waitpid(pid, &status, 0);
+        //waitpid(pid, &status, 0);
+
+        wait(&status);
 
         // Comprobar la causa de la finalización del hijo
         if (WIFEXITED(status)) {

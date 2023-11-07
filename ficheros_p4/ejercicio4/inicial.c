@@ -13,20 +13,21 @@ int main(void)
     char buffer[6];
 
     fd1 = open("output.txt", O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
-    write(fd1, "00000", 5);
+    //write(fd1, "00000", 5);
     for (i=1; i < 10; i++) {
-        fd1 = open("output.txt", O_RDWR, S_IRUSR | S_IWUSR);
-        pos = lseek(fd1, i*16, SEEK_CUR);
         if (fork() == 0) {
             /* Child */
+            fd1 = open("output.txt", O_RDWR, S_IRUSR | S_IWUSR);
+            lseek(fd1, i*10 - 5, SEEK_SET);
             sprintf(buffer, "%d", i*11111);
-            lseek(fd1, pos, SEEK_SET);
             write(fd1, buffer, 5);
             close(fd1);
             exit(0);
         } else {
             /* Parent */
-            lseek(fd1, 5, SEEK_CUR);
+            lseek(fd1, (i-1)*10, SEEK_SET);
+            sprintf(buffer, "%05d", 0); // Escribir el número del padre
+            write(fd1, buffer, 5);
         }
     }
 
