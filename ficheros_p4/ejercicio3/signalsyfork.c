@@ -52,7 +52,12 @@ int main(int argc, char **argv) {
         // Esperar a que el hijo termine
         //waitpid(pid, &status, 0);
 
+        // Si solo se hace un wait (sin pause) devuelve el estado del último proceso hijo
         wait(&status);
+
+        /*Por eso, se puede meter dentro de un bucle hasta que sea pid del hijo
+             while (wait(&status) != pid)
+         */
 
         // Comprobar la causa de la finalización del hijo
         if (WIFEXITED(status)) {
