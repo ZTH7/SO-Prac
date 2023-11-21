@@ -6,7 +6,7 @@
 #define CAPACITY 5
 #define VIPSTR(vip) ((vip) ? "  vip  " : "not vip")
 
-int client_num = 0, vip_query = 0;
+int client_num = 0, vip_queue = 0;
 pthread_mutex_t mutex;
 pthread_cond_t full;
 
@@ -19,10 +19,10 @@ void enter_normal_client(int id)
 {
 	pthread_mutex_lock(&mutex);
 	
-	while (client_num >= CAPACITY || vip_query > 0)
+	while (client_num >= CAPACITY || vip_queue > 0)
 		pthread_cond_wait(&full, &mutex);
 
-    printf("Client %d (not vip) enter disco\n", id);
+	printf("Client %d (not vip) enter disco\n", id);
 	client_num++;
 
 	pthread_mutex_unlock(&mutex);
@@ -33,13 +33,13 @@ void enter_vip_client(int id)
 	pthread_mutex_lock(&mutex);
 
 	while (client_num >= CAPACITY) {
-		vip_query++;
+		vip_queue++;
 		pthread_cond_wait(&full, &mutex);
 	}
 
-    printf("Client %d (vip) enter disco\n", id);
+	printf("Client %d (vip) enter disco\n", id);
 	client_num++;
-	vip_query--;
+	vip_queue--;
 
 	pthread_mutex_unlock(&mutex);
 }
@@ -66,11 +66,11 @@ void *client(void *arg)
 	struct client_info* info = (struct client_info *)arg;
 	int id = info->id, isvip = info->isvip;
 	if ( isvip )
-        enter_vip_client(id);
-    else
-        enter_normal_client(id);
-    dance(id, isvip);
-    disco_exit(id, isvip);
+		enter_vip_client(id);
+	else
+		enter_normal_client(id);
+	dance(id, isvip);
+	disco_exit(id, isvip);
 
 	free(arg);
 }
@@ -94,14 +94,14 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mutex, NULL);
 
 	for (int i = 0; i < num; i++)
-    {
-        struct client_info* info = malloc(sizeof(struct client_info));
+	{
+		struct client_info* info = malloc(sizeof(struct client_info));
 
-        fscanf(file, "%d", &info->isvip);
-        info->id = i;
+		fscanf(file, "%d", &info->isvip);
+		info->id = i;
 
-        pthread_create(&threads[i], NULL, client, info);
-    }
+		pthread_create(&threads[i], NULL, client, info);
+	}
 
 	for (int i = 0; i < num; i++) pthread_join(threads[i], NULL);
 
