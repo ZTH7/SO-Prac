@@ -6,7 +6,11 @@
 #define CAPACITY 5
 #define VIPSTR(vip) ((vip) ? "  vip  " : "not vip")
 
-int client_num = 0, vip_queue = 0;
+int num_cliente=0;
+int turno_actual=0;
+int turno_actual_vip=0;
+int dispensador_turnos=0;
+int dispensador_turnos_vip=0;
 pthread_mutex_t mutex;
 pthread_cond_t full;
 
@@ -17,29 +21,32 @@ struct client_info {
 
 void enter_normal_client(int id)
 {
+	int turno;
 	pthread_mutex_lock(&mutex);
-	
-	while (client_num >= CAPACITY || vip_queue > 0)
+
+	turno = dispensador_turnos++;
+	while (turno != turno_actual || num_cliente >= CAPACITY || dispensador_turnos_vip - turno_actual_vip > 0)
 		pthread_cond_wait(&full, &mutex);
 
+	turno_actual++;
 	printf("Client %d (not vip) enter disco\n", id);
-	client_num++;
+	num_cliente++;
 
 	pthread_mutex_unlock(&mutex);
 }
 
 void enter_vip_client(int id)
 {
+	int turno;
 	pthread_mutex_lock(&mutex);
 
-	while (client_num >= CAPACITY) {
-		vip_queue++;
+	turno = dispensador_turnos_vip++;
+	while (turno != turno_actual_vip || num_cliente >= CAPACITY)
 		pthread_cond_wait(&full, &mutex);
-	}
 
+	turno_actual_vip++;
 	printf("Client %d (vip) enter disco\n", id);
-	client_num++;
-	vip_queue--;
+	num_cliente++;
 
 	pthread_mutex_unlock(&mutex);
 }
@@ -55,7 +62,7 @@ void disco_exit(int id, int isvip)
 	pthread_mutex_lock(&mutex);
 	
 	printf("Client %d (%s) exit disco\n", id, VIPSTR(isvip));
-	client_num--;
+	num_cliente--;
 
 	pthread_cond_signal(&full);
 	pthread_mutex_unlock(&mutex);
