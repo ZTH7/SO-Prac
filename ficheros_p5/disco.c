@@ -64,7 +64,8 @@ void disco_exit(int id, int isvip)
 	printf("Client %d (%s) exit disco\n", id, VIPSTR(isvip));
 	num_cliente--;
 
-	pthread_cond_signal(&full);
+	// Depertar a todos los hilos para ver si es su turno, porque la cola no garantiza el orden de llegada
+	pthread_cond_broadcast(&full);
 	pthread_mutex_unlock(&mutex);
 }
 
