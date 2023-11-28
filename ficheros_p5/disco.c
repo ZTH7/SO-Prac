@@ -12,7 +12,7 @@ int turno_actual_vip=0;
 int dispensador_turnos=0;
 int dispensador_turnos_vip=0;
 pthread_mutex_t mutex;
-pthread_cond_t full;
+pthread_cond_t full, full_vip;
 
 struct client_info {
 	int id;
@@ -25,10 +25,11 @@ void enter_normal_client(int id)
 	pthread_mutex_lock(&mutex);
 
 	turno = dispensador_turnos++;
-	while (turno != turno_actual || num_cliente >= CAPACITY || dispensador_turnos_vip - turno_actual_vip > 0)
+	while (turno != turno_actual || num_cliente >= CAPACITY || (dispensador_turnos_vip - turno_actual_vip) > 0)
 		pthread_cond_wait(&full, &mutex);
 
 	turno_actual++;
+	pthread_cond_broadcast(&full);
 	printf("Client %d (not vip) enter disco\n", id);
 	num_cliente++;
 
@@ -42,12 +43,18 @@ void enter_vip_client(int id)
 
 	turno = dispensador_turnos_vip++;
 	while (turno != turno_actual_vip || num_cliente >= CAPACITY)
-		pthread_cond_wait(&full, &mutex);
+		pthread_cond_wait(&full_vip, &mutex);
 
 	turno_actual_vip++;
-	printf("Client %d (vip) enter disco\n", id);
+	printf("Client %d (  vip  ) enter disco\n", id);
 	num_cliente++;
-
+	if ((dispensador_turnos_vip - turno_actual_vip) == 0) {
+		pthread_cond_broadcast(&full);
+	}
+	else {
+		pthread_cond_broadcast(&full_vip);
+	}
+	
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -65,7 +72,13 @@ void disco_exit(int id, int isvip)
 	num_cliente--;
 
 	// Depertar a todos los hilos para ver si es su turno, porque la cola no garantiza el orden de llegada
-	pthread_cond_broadcast(&full);
+	if ((dispensador_turnos_vip - turno_actual_vip) == 0) {
+		pthread_cond_broadcast(&full);
+	}
+	else {
+		pthread_cond_broadcast(&full_vip);
+	}
+
 	pthread_mutex_unlock(&mutex);
 }
 
