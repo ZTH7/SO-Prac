@@ -6,24 +6,19 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <stdbool.h>
+#include "datos.h"
 
-
-#define NUMITER 3
+#define NUMITER 15
 #define SHARED_MEM_NAME "/caldero_shared_mem"
 #define COOK_SEM_NAME "/cook_semaphore"
 #define SAV_SEM_NAME "/savage_semaphore"
 #define MTX_NAME "/mutex"
 
-struct data {
-    int servings;
-    int cook_waiting; /* # de hilos bloqueados en cook_queue (0 o 1) */
-    int nr_sav_waiting; /* # de salvajes bloqueados */  
-};
-
 void eat(void)
 {
     unsigned long id = (unsigned long) getpid();
     printf("Savage %lu eating\n", id);
+    sleep(rand() % 3);
 }
 
 bool getServingsFromPot(sem_t *cook_queue, sem_t *sav_queue, sem_t *sem_mtx, struct data *shared_mem)
