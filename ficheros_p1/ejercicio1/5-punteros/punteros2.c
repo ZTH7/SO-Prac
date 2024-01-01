@@ -24,7 +24,7 @@ int main(void)
 	ptr2++;
 	*ptr2 = 15;
 	printf("Address of the element ptr[1] %p. Memory content at that address: %d \n",
-			&ptr[1], ptr[1]);
+			&ptr2[0], ptr2[0]);
 
 	free(ptr);
 	*ptr = 3;

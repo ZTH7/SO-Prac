@@ -36,8 +36,9 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     } else {
         // Código del proceso padre
+
 		// Ignorar la señal SIGINT
-        //signal(SIGINT, SIG_IGN);
+        signal(SIGINT, SIG_IGN);
 
         // Establecer el manejador de la señal SIGALRM
         struct sigaction sa;
@@ -47,17 +48,16 @@ int main(int argc, char **argv) {
         // Programar una alarma para que envíe una señal después de 5 segundos
         alarm(5);
 
-        pause(); // Espera a que acaben las señales
+        // Se puede meter dentro de un bucle hasta que sea pid del hijo
+        while (wait(&status) != pid);
+
+        //pause(); // Espera a que acaben las señales
 
         // Esperar a que el hijo termine
         //waitpid(pid, &status, 0);
 
         // Si solo se hace un wait (sin pause) devuelve el estado del último proceso hijo
-        wait(&status);
-
-        /*Por eso, se puede meter dentro de un bucle hasta que sea pid del hijo
-             while (wait(&status) != pid)
-         */
+        // wait(&status);
 
         // Comprobar la causa de la finalización del hijo
         if (WIFEXITED(status)) {
