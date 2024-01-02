@@ -56,7 +56,6 @@ void process_recurse(char *dirname, char *name)
     int status;
     pid = fork();
     if (pid == 0) {
-        printf("%s:\n", path);
         execl(opt.progname, opt.progname, "-R", path, (char *)NULL);
         perror("execl");
         exit(EXIT_FAILURE);
@@ -109,6 +108,11 @@ int main(int argc, char **argv)
         default:
             exit(EXIT_FAILURE);
         }
+    }
+    
+    if(optind < argc) dirname = argv[optind];
+    if (dirname[strlen(dirname) - 1] == '/') {
+        dirname[strlen(dirname) - 1] = '\0';
     }
 
     if (opt.recurse)
